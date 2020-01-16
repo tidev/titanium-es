@@ -5,7 +5,7 @@
 </p>
 
 ### Generate Wrappers
-```
+```JS
 import TitaniumES from 'titanium-es';
 
 TitaniumES('api.jsca', 'output');
