@@ -1,0 +1,142 @@
+/**
+ * @module Titanium-ES
+ *
+ * @copyright
+ * Copyright (c) 2020 by Axway, Inc. All Rights Reserved.
+ *
+ * @license
+ * Licensed under the terms of the Apache Public License
+ * Please see the LICENSE included with this distribution for details.
+ */
+import ProxyWrapper from '<%- `${depth ? '../'.repeat(depth) : './'}ProxyWrapper` -%>';
+<% if (modules.length) { -%>
+
+<% for (let module of modules) { -%>
+<% module.path = module.path.startsWith('.') ? module.path : `./${module.path}` -%>
+<% if (false && module.export) { -%>
+export { default as <%- module.name -%> } from '<%- module.path -%>';
+<% } -%>
+import <%- module.name -%> from '<%- module.path -%>';
+<% } -%>
+<% } -%>
+<% function defineMethod(method, prefix) { -%>
+	<%- prefix ? `${prefix} ` : '' -%><%- method.name -%> (<%- method.parameterDefinition -%>) {
+		try {
+<% for (let parameter of method.parameters) { -%>
+			ProxyWrapper.assert('<%- parameter.name -%>', <%- parameter.name -%>, '<%- parameter.type.toLowerCase() -%>', <%- parameter.usage === 'optional' ? 'true' : 'false' -%>);
+<% } -%>
+<% for (let parameter of method.parameterUnwrap) { -%>
+			<%- parameter -%> = ProxyWrapper.unwrap(<%- parameter -%>);
+<% } -%>
+<% let call -%>
+<% if (method.wrap) { -%>
+<% call = `new ${method.wrap}(this._object.${method.name}(${method.parameterDefinition}))` -%>
+<% } else { -%>
+<% call = `this._object.${method.name}(${method.parameterDefinition})` -%>
+<% } -%>
+<% for (let parameter of method.parameterPromisify) { -%>
+			if (!<%- parameter -%>) {
+				return new Promise(resolve => <%- call.replace(parameter, 'resolve') -%>);
+			}
+<% } -%>
+			return <%- call -%>;
+		} catch (e) {
+			ProxyWrapper.error(<%- className -%>._namespace, ProxyWrapper.TYPE.METHOD, '<%- method.name -%>');
+			throw e;
+		}
+	}
+<% } -%>
+<% function defineProperty(property, prefix) { -%>
+	<%- prefix ? `${prefix} ` : '' -%>get <%- property.name -%> () {
+<% if (property.wrap) { -%>
+		return new <%- property.wrap -%>(this._object.<%- property.name -%>);
+<% } else { -%>
+		return this._object.<%- property.name -%>;
+<% } -%>
+	}
+<% if (property.permission !== 'read-only') { -%>
+	<%- prefix ? `${prefix} ` : '' -%>set <%- property.name -%> (value) {
+		try {
+			ProxyWrapper.assert('<%- property.name -%>', value, '<%- property.type.toLowerCase() -%>', false);
+			this._object.<%- property.name -%> = value;
+		} catch (e) {
+			ProxyWrapper.error(<%- className -%>._namespace, ProxyWrapper.TYPE.PROPERTY, '<%- property.name -%>');
+			throw e;
+		}
+	}
+<% } -%>
+<% } -%>
+<% function defineConstant(constant) { -%>
+	static get <%- constant.name -%> () {
+<% if (constant.wrap) { -%>
+		return new <%- constant.wrap -%>(<%- `${namespace}.${constant.name}` -%>);
+<% } else { -%>
+		return <%- `${namespace}.${constant.name}` -%>;
+<% } -%>
+	}
+<% } -%>
+
+export default class <%- className -%> extends ProxyWrapper {
+
+	constructor (object) {
+		super(object);
+
+<% apiNameSuffix = namespace.replace(/Titanium|Ti|_/g, '') -%>
+		if (object && object.apiName<% if (apiNameSuffix.length) { -%> && object.apiName.endsWith('<%- apiNameSuffix -%>')<% } -%>) {
+			this._object = object;
+		} else {
+			this._object = <%- creator ? `${creator}(ProxyWrapper.unwrap(object))` : `undefined` -%>;
+		}
+	}
+
+	static get _namespace () {
+		return '<%- namespace -%>';
+	}
+<% if (constants.length) { -%>
+
+	// Constants
+<% for (let constant of constants) { -%>
+<% defineConstant(constant) -%>
+<% } -%>
+<% } -%>
+<% if (properties.length) { -%>
+
+	// Properties
+<% for (let property of properties) { -%>
+<% defineProperty(property) -%>
+<% } -%>
+<% } -%>
+<% if (staticProperties.length) { -%>
+
+	// Static Properties
+<% for (let property of staticProperties) { -%>
+<% defineProperty(property, 'static') -%>
+<% } -%>
+<% } -%>
+<% if (methods.length) { -%>
+
+	// Methods
+<% for (let method of methods) { -%>
+<% defineMethod(method) -%>
+<% } -%>
+<% } -%>
+<% if (staticMethods.length) { -%>
+
+	// Static Methods
+<% for (let method of staticMethods) { -%>
+<% defineMethod(method, 'static') -%>
+<% } -%>
+<% } -%>
+<% if (modules.length && modules.find(m => m.export)) { -%>
+
+	// Modules
+<% for (let module of modules) { -%>
+<% if (module.export) { -%>
+	static get <%- module.name -%> () {
+		return <%- module.name -%>;
+	}
+<% } -%>
+<% } -%>
+<% } -%>
+}
+Object.freeze(<%- className -%>);

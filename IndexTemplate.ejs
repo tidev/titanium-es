@@ -1,0 +1,17 @@
+/**
+ * @module Titanium-ES
+ *
+ * @copyright
+ * Copyright (c) 2020 by Axway, Inc. All Rights Reserved.
+ *
+ * @license
+ * Licensed under the terms of the Apache Public License
+ * Please see the LICENSE included with this distribution for details.
+ */
+import { register } from '../binding';
+import _Titanium from './Titanium';
+
+register('Titanium', _Titanium);
+<% for (const name of [...register].sort()) { -%>
+register('<%- name.split('.').join('/') -%>', _<%- name -%>);
+<% } -%>
