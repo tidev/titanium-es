@@ -12,7 +12,13 @@ const ejs = require('ejs');
 const fs = require('fs-extra');
 const path = require('path');
 
-exports.generate = (apiPath, outputDir) => {
+/**
+ * Generate Titanium-ES proxy wrappers.
+ * 
+ * @param apiPath Path to Titanium documentation `api.jsca` file.
+ * @param outputDir Directory to output generated proxy wrappers.
+ */
+exports.generate = async (apiPath, outputDir) => {
 
     const references = {};
     const namespaces = {};
@@ -329,7 +335,7 @@ exports.generate = (apiPath, outputDir) => {
         }
 
         // Generate proxy wrappers from template.
-        const output = ejs.render((await fs.readFile('src/ProxyTemplate.ejs')).toString(), data);
+        const output = ejs.render((await fs.readFile(`${__dirname}/ProxyTemplate.ejs`)).toString(), data);
         const targetDir = path.join(outputDir, namespace.slice(0, -1).join(path.sep));
         const targetPath = path.join(outputDir, namespace.join(path.sep) + '.js');
 
@@ -338,10 +344,10 @@ exports.generate = (apiPath, outputDir) => {
     }
 
     // Generate bindings index from template.
-    const output = ejs.render((await fs.readFile('src/IndexTemplate.ejs')).toString(), { register });
-    const targetPath = path.join(outputDir, 'index.js');
+    const output = ejs.render((await fs.readFile(`${__dirname}/RegisterTemplate.ejs`)).toString(), { register });
+    const targetPath = path.join(outputDir, 'titanium-es.js');
     await fs.writeFile(targetPath, output);
 
     // Copy over base proxy wrapper.
-    await fs.copyFile('src/ProxyWrapper.js', path.join(outputDir, 'ProxyWrapper.js'));
+    await fs.copyFile(`${__dirname}/ProxyWrapper.js`, path.join(outputDir, 'ProxyWrapper.js'));
 };
