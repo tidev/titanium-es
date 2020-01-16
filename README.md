@@ -8,7 +8,7 @@
 ```JS
 import TitaniumES from 'titanium-es';
 
-TitaniumES('api.jsca', 'output');
+await TitaniumES.generate('api.jsca', 'output');
 ```
 
 #### Example
