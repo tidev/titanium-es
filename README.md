@@ -6,7 +6,9 @@
 
 ### Generate Wrappers
 ```
-node . <path/to/api.jsca>
+import TitaniumES from 'titanium-es';
+
+TitaniumES('api.jsca', 'output');
 ```
 
 #### Example
