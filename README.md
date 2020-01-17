@@ -1,5 +1,5 @@
 <p align="center">
-	<img src="https://github.com/appcelerator/titanium-es/raw/master/README/es.png" height="128 " width="128">
+	<img src="https://github.com/appcelerator/titanium-es/raw/master/es.png" height="128 " width="128">
 	<h1 align="center">titanium-es</h1>
 	<h5 align="center">Generates a modern ECMAScript wrapper for Titanium API</h6>
 </p>
