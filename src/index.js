@@ -345,7 +345,7 @@ exports.generate = async (apiPath, outputDir) => {
 
     // Generate bindings index from template.
     const output = ejs.render((await fs.readFile(`${__dirname}/RegisterTemplate.ejs`)).toString(), { register });
-    const targetPath = path.join(outputDir, 'titanium-es.js');
+    const targetPath = path.join(outputDir, 'index.js');
     await fs.writeFile(targetPath, output);
 
     // Copy over base proxy wrapper.
