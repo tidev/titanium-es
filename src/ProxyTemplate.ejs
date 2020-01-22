@@ -8,15 +8,15 @@
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  */
-import ProxyWrapper from '<%- `${depth ? '../'.repeat(depth) : './'}ProxyWrapper` -%>';
+const ProxyWrapper = require('<%- `${depth ? '../'.repeat(depth) : './'}ProxyWrapper` -%>').default;
 <% if (modules.length) { -%>
 
-<% for (let module of modules) { -%>
+<% for (let module of [] /*modules*/) { -%>
 <% module.path = module.path.startsWith('.') ? module.path : `./${module.path}` -%>
 <% if (false && module.export) { -%>
 export { default as <%- module.name -%> } from '<%- module.path -%>';
 <% } -%>
-// import <%- module.name -%> from '<%- module.path -%>';
+import <%- module.name -%> from '<%- module.path -%>';
 <% } -%>
 <% } -%>
 <% function defineMethod(method, prefix) { -%>
@@ -131,6 +131,7 @@ export default class <%- className -%> extends ProxyWrapper {
 
 	// Modules
 <% for (let module of modules) { -%>
+<% module.path = module.path.startsWith('.') ? module.path : `./${module.path}` -%>
 <% if (module.export) { -%>
 	static get <%- module.name -%> () {
 		return require('<%- module.path -%>').default;

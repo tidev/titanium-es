@@ -11,6 +11,7 @@
 const ejs = require('ejs');
 const fs = require('fs-extra');
 const path = require('path');
+const { transformSync } = require('@babel/core');
 
 /**
  * Generate Titanium-ES proxy wrappers.
@@ -340,14 +341,20 @@ exports.generate = async (apiPath, outputDir) => {
         const targetPath = path.join(outputDir, namespace.join(path.sep) + '.js');
 
         await fs.ensureDir(targetDir);
-        await fs.writeFile(targetPath, output);
+        await fs.writeFile(targetPath, transpile(output));
     }
 
     // Generate bindings index from template.
     const output = ejs.render((await fs.readFile(`${__dirname}/RegisterTemplate.ejs`)).toString(), { register });
     const targetPath = path.join(outputDir, 'index.js');
-    await fs.writeFile(targetPath, output);
+    await fs.writeFile(targetPath, transpile(output));
 
     // Copy over base proxy wrapper.
-    await fs.copyFile(`${__dirname}/ProxyWrapper.js`, path.join(outputDir, 'ProxyWrapper.js'));
+    await fs.writeFile(path.join(outputDir, 'ProxyWrapper.js'), transpile((await fs.readFile(`${__dirname}/ProxyWrapper.js`)).toString()));
 };
+
+function transpile (code) {
+    return transformSync(code, {
+        presets: [ '@babel/preset-env' ]
+    }).code
+}
