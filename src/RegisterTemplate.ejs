@@ -9,9 +9,8 @@
  * Please see the LICENSE included with this distribution for details.
  */
 import { register } from '../binding';
-import _Titanium from './Titanium';
 
-register('Titanium', _Titanium);
+register('Titanium', _ => require('./Titanium').default);
 <% for (const name of [...register].sort()) { -%>
-register('<%- name.split('.').join('/') -%>', _<%- name -%>);
+register('<%- name.split('.').join('/') -%>', _ => require('./<%- name.split('.').join('/') -%>').default);
 <% } -%>

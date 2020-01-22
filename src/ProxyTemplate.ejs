@@ -16,7 +16,7 @@ import ProxyWrapper from '<%- `${depth ? '../'.repeat(depth) : './'}ProxyWrapper
 <% if (false && module.export) { -%>
 export { default as <%- module.name -%> } from '<%- module.path -%>';
 <% } -%>
-import <%- module.name -%> from '<%- module.path -%>';
+// import <%- module.name -%> from '<%- module.path -%>';
 <% } -%>
 <% } -%>
 <% function defineMethod(method, prefix) { -%>
@@ -133,7 +133,7 @@ export default class <%- className -%> extends ProxyWrapper {
 <% for (let module of modules) { -%>
 <% if (module.export) { -%>
 	static get <%- module.name -%> () {
-		return <%- module.name -%>;
+		return require('<%- module.path -%>').default;
 	}
 <% } -%>
 <% } -%>
