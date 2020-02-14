@@ -13,13 +13,20 @@ const fs = require('fs-extra');
 const path = require('path');
 const { transformSync } = require('@babel/core');
 
+const EXTENSION_NAME = 'titanium-es';
+
 /**
  * Generate Titanium-ES proxy wrappers.
  * 
  * @param apiPath Path to Titanium documentation `api.jsca` file.
  * @param outputDir Directory to output generated proxy wrappers.
  */
-exports.generate = async (apiPath, outputDir) => {
+exports.generate = async (apiPath, outputDir, registerDir) => {
+
+    outputDir = path.join(outputDir, EXTENSION_NAME);
+    if (registerDir) {
+        registerDir = path.join(registerDir, EXTENSION_NAME);
+    }
 
     const references = {};
     const namespaces = {};
@@ -346,7 +353,9 @@ exports.generate = async (apiPath, outputDir) => {
 
     // Generate bindings index from template.
     const output = ejs.render((await fs.readFile(`${__dirname}/RegisterTemplate.ejs`)).toString(), { register });
-    const targetPath = path.join(outputDir, 'index.js');
+    const targetPath = path.join(registerDir || outputDir, 'index.js');
+
+    await fs.ensureDir(registerDir || outputDir);
     await fs.writeFile(targetPath, transpile(output));
 
     // Copy over base proxy wrapper.

@@ -11,12 +11,16 @@
 const ProxyWrapper = require('<%- `${depth ? '../'.repeat(depth) : './'}ProxyWrapper` -%>').default;
 <% if (modules.length) { -%>
 
-<% for (let module of [] /*modules*/) { -%>
+<% for (let module of modules) { -%>
 <% module.path = module.path.startsWith('.') ? module.path : `./${module.path}` -%>
-<% if (false && module.export) { -%>
+<% if (module.export) { -%>
 export { default as <%- module.name -%> } from '<%- module.path -%>';
 <% } -%>
-import <%- module.name -%> from '<%- module.path -%>';
+<% } -%>
+<% for (let module of modules) { -%>
+<% if (!module.export) { -%>
+const <%- module.name -%> = require('<%- module.path -%>').default;
+<% } -%>
 <% } -%>
 <% } -%>
 <% function defineMethod(method, prefix) { -%>
