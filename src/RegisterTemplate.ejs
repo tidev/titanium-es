@@ -11,8 +11,8 @@
 import { redirect } from '../binding';
 
 <% const extensionDir = './ti.internal/extensions/titanium-es/' -%>
-redirect('Titanium', _ => require('<%- extensionDir -%>Titanium').default);
+redirect('Titanium', '<%- extensionDir -%>Titanium');
 <% for (const name of [...register].sort()) { -%>
-<% const path = '<%- name.split('.').join('/') -%>' -%>
-redirect(<%- path -%>, _ => require('./<%- extensionDir + path -%>').default);
+<% const path = name.split('.').join('/') -%>
+redirect('<%- path -%>', '<%- extensionDir + path -%>');
 <% } -%>
